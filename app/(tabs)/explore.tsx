@@ -19,7 +19,7 @@ export default function ExploreScreen() {
   } = useExploreStore();
 
   const { data: popularEvents, isLoading: isLoadingPopular } = usePopularEvents();
-  const { data: featuredEvents, isLoading: isLoadingFeatured } = useFeaturedEvents(selectedCategories);
+  const { isLoading: isLoadingFeatured } = useFeaturedEvents(selectedCategories);
   const { data: searchResults, isLoading: isSearching } = useSearchEvents(searchQuery);
 
   const displayEvents = searchQuery 

@@ -18,13 +18,14 @@ export interface Event {
   location: EventLocation;
   organizer: User;
   attendees: EventAttendee[];
+  capacity?: number; // Added for backward compatibility
   maxCapacity?: number;
-  isPublic: boolean;
-  category: EventCategory;
-  status: EventStatus;
+  isPublic?: boolean; // Made optional for mock data
+  category?: EventCategory; // Made optional for mock data
+  status?: EventStatus; // Made optional for mock data
   imageUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date; // Made optional for mock data
+  updatedAt?: Date; // Made optional for mock data
 }
 
 export interface EventLocation {
@@ -94,4 +95,87 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
   hasMore: boolean;
+}
+
+// Enhanced error handling types
+export interface ApiError {
+  message: string;
+  status: number;
+  code?: string;
+  details?: Record<string, any>;
+}
+
+export class ApiException extends Error {
+  public readonly status: number;
+  public readonly code?: string;
+  public readonly details?: Record<string, any>;
+
+  constructor(error: ApiError) {
+    super(error.message);
+    this.name = 'ApiException';
+    this.status = error.status;
+    this.code = error.code;
+    this.details = error.details;
+  }
+}
+
+// Utility types for better type safety and code organization
+export type RequiredKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
+}[keyof T];
+
+export type OptionalKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? K : never;
+}[keyof T];
+
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type RequiredBy<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
+// Common loading and error states for UI components
+export interface LoadingState {
+  isLoading: boolean;
+  error?: string | null;
+}
+
+export interface AsyncState<T> extends LoadingState {
+  data?: T;
+}
+
+// Common form validation types
+export interface ValidationError {
+  field: string;
+  message: string;
+}
+
+export interface FormState<T> {
+  values: T;
+  errors: ValidationError[];
+  isSubmitting: boolean;
+  isValid: boolean;
+}
+
+// Event-specific utility types
+export type CreateEventInput = Omit<Event, 'id' | 'attendees' | 'createdAt' | 'updatedAt'> & {
+  location: Omit<EventLocation, 'id'>;
+  organizer: Pick<User, 'id'>;
+};
+
+export type EventSummary = Pick<Event, 'id' | 'title' | 'startDate' | 'location' | 'capacity'>;
+
+export type UserProfile = Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'profilePicture'>;
+
+// Query and mutation result types for consistent API responses
+export interface QueryResult<T> {
+  data?: T;
+  isLoading: boolean;
+  error?: Error;
+  refetch: () => void;
+}
+
+export interface MutationResult<T> {
+  mutate: (data: T) => void;
+  isLoading: boolean;
+  error?: Error;
+  isSuccess: boolean;
 }
