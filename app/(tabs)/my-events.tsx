@@ -1,15 +1,15 @@
 import { FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useEvents } from '@/hooks/useEvents';
+import { useMyEvents } from '@/hooks/useEvents';
 import { Event } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 
-export default function EventsScreen() {
+export default function MyEventsScreen() {
   const { isAuthenticated } = useAuth();
-  const { data, isLoading, refetch, fetchNextPage, hasNextPage } = useEvents();
+  const { data, isLoading, refetch, fetchNextPage, hasNextPage } = useMyEvents();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -25,6 +25,9 @@ export default function EventsScreen() {
         {new Date(item.startDate).toLocaleDateString()}
       </ThemedText>
       <ThemedText style={styles.eventLocation}>{item.location.name}</ThemedText>
+      <ThemedText style={styles.attendeeCount}>
+        {item.attendees.length} / {item.maxCapacity || '∞'} attendees
+      </ThemedText>
     </ThemedView>
   );
 
@@ -34,7 +37,7 @@ export default function EventsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Upcoming Events</ThemedText>
+      <ThemedText type="title" style={styles.title}>My Events</ThemedText>
       
       <FlatList
         data={data?.events || []}
@@ -51,7 +54,7 @@ export default function EventsScreen() {
         onEndReachedThreshold={0.1}
         ListEmptyComponent={
           <ThemedView style={styles.emptyContainer}>
-            <ThemedText>No events found</ThemedText>
+            <ThemedText>You haven't created any events yet</ThemedText>
           </ThemedView>
         }
       />
@@ -86,6 +89,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 12,
     opacity: 0.6,
+  },
+  attendeeCount: {
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '500',
   },
   emptyContainer: {
     flex: 1,
