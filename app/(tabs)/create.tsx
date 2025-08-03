@@ -1,17 +1,12 @@
 import { useState } from 'react';
-import { ScrollView, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useCreateEvent } from '@/hooks/useEvents';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { useAuth } from '@/contexts/AuthContext';
-import { useEffect } from 'react';
+import { ScreenContainer, FormInput, PrimaryButton, AuthGuard } from '@/components/common';
 
 export default function CreateEventScreen() {
-  const { isAuthenticated } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [locationName, setLocationName] = useState('');
@@ -26,13 +21,6 @@ export default function CreateEventScreen() {
   const [isPublic, setIsPublic] = useState(true);
   
   const createEventMutation = useCreateEvent();
-  const colorScheme = useColorScheme();
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/(auth)/login');
-    }
-  }, [isAuthenticated]);
 
   const handleCreateEvent = async () => {
     if (!title || !description || !locationName || !startDate || !startTime) {
@@ -66,111 +54,90 @@ export default function CreateEventScreen() {
       Alert.alert('Success', 'Event created successfully!', [
         { text: 'OK', onPress: () => router.back() }
       ]);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to create event');
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <ScrollView style={styles.scrollView}>
+    <AuthGuard>
+      <ScreenContainer>
         <ThemedView style={styles.content}>
         <ThemedText type="title" style={styles.title}>Create Event</ThemedText>
         
         <ThemedView style={styles.form}>
-          <TextInput
-            style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+          <FormInput
             placeholder="Event Title *"
-            placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
             value={title}
             onChangeText={setTitle}
           />
           
-          <TextInput
-            style={[styles.input, styles.textArea, { color: Colors[colorScheme ?? 'light'].text }]}
+          <FormInput
+            variant="textarea"
             placeholder="Description *"
-            placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
             value={description}
             onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
           />
           
-          <TextInput
-            style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+          <FormInput
             placeholder="Location Name *"
-            placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
             value={locationName}
             onChangeText={setLocationName}
           />
           
-          <TextInput
-            style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+          <FormInput
             placeholder="Address"
-            placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
             value={address}
             onChangeText={setAddress}
           />
           
           <ThemedView style={styles.row}>
-            <TextInput
-              style={[styles.input, styles.halfInput, { color: Colors[colorScheme ?? 'light'].text }]}
+            <FormInput
+              style={styles.halfInput}
               placeholder="City"
-              placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
               value={city}
               onChangeText={setCity}
             />
-            <TextInput
-              style={[styles.input, styles.halfInput, { color: Colors[colorScheme ?? 'light'].text }]}
+            <FormInput
+              style={styles.halfInput}
               placeholder="State"
-              placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
               value={state}
               onChangeText={setState}
             />
           </ThemedView>
           
           <ThemedView style={styles.row}>
-            <TextInput
-              style={[styles.input, styles.halfInput, { color: Colors[colorScheme ?? 'light'].text }]}
+            <FormInput
+              style={styles.halfInput}
               placeholder="Start Date (YYYY-MM-DD) *"
-              placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
               value={startDate}
               onChangeText={setStartDate}
             />
-            <TextInput
-              style={[styles.input, styles.halfInput, { color: Colors[colorScheme ?? 'light'].text }]}
+            <FormInput
+              style={styles.halfInput}
               placeholder="Start Time (HH:MM) *"
-              placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
               value={startTime}
               onChangeText={setStartTime}
             />
           </ThemedView>
           
           <ThemedView style={styles.row}>
-            <TextInput
-              style={[styles.input, styles.halfInput, { color: Colors[colorScheme ?? 'light'].text }]}
+            <FormInput
+              style={styles.halfInput}
               placeholder="End Date (YYYY-MM-DD)"
-              placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
               value={endDate}
               onChangeText={setEndDate}
             />
-            <TextInput
-              style={[styles.input, styles.halfInput, { color: Colors[colorScheme ?? 'light'].text }]}
+            <FormInput
+              style={styles.halfInput}
               placeholder="End Time (HH:MM)"
-              placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
               value={endTime}
               onChangeText={setEndTime}
             />
           </ThemedView>
           
-          <TextInput
-            style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+          <FormInput
             placeholder="Max Capacity (optional)"
-            placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
             value={maxCapacity}
             onChangeText={setMaxCapacity}
             keyboardType="numeric"
@@ -183,29 +150,20 @@ export default function CreateEventScreen() {
             <ThemedText>Public Event: {isPublic ? 'Yes' : 'No'}</ThemedText>
           </Pressable>
           
-          <Pressable
-            style={[styles.button, { backgroundColor: Colors[colorScheme ?? 'light'].tint }]}
+          <PrimaryButton
+            title="Create Event"
             onPress={handleCreateEvent}
-            disabled={createEventMutation.isPending}
-          >
-            <ThemedText style={styles.buttonText}>
-              {createEventMutation.isPending ? 'Creating...' : 'Create Event'}
-            </ThemedText>
-          </Pressable>
+            isLoading={createEventMutation.isPending}
+            loadingText="Creating..."
+          />
           </ThemedView>
         </ThemedView>
-      </ScrollView>
-    </SafeAreaView>
+      </ScreenContainer>
+    </AuthGuard>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
   content: {
     padding: 16,
   },
@@ -214,17 +172,6 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
   },
   row: {
     flexDirection: 'row',
@@ -239,16 +186,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
-  },
-  button: {
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

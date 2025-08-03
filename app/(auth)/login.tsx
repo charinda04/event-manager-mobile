@@ -1,19 +1,16 @@
 import { useState } from 'react';
-import { View, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Pressable, StyleSheet, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/contexts/AuthContext';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ScreenContainer, FormInput, PrimaryButton } from '@/components/common';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('demo@example.com');
   const [password, setPassword] = useState('password123');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
-  const colorScheme = useColorScheme();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -25,7 +22,7 @@ export default function LoginScreen() {
     try {
       await login({ email, password });
       router.replace('/(tabs)');
-    } catch (error) {
+    } catch {
       Alert.alert('Login Failed', 'Invalid email or password');
     } finally {
       setIsLoading(false);
@@ -42,7 +39,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
+    <ScreenContainer scrollable={false} backgroundColor="#FFF">
       <ThemedView style={styles.content}>
       <ThemedText type="title" style={styles.title}>Welcome Back</ThemedText>
       
@@ -56,10 +53,8 @@ export default function LoginScreen() {
       </View>
       
       <View style={styles.form}>
-        <TextInput
-          style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+        <FormInput
           placeholder="Email"
-          placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -67,41 +62,33 @@ export default function LoginScreen() {
           autoComplete="email"
         />
         
-        <TextInput
-          style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+        <FormInput
           placeholder="Password"
-          placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           autoComplete="password"
         />
         
-        <Pressable
-          style={[styles.button, { backgroundColor: Colors[colorScheme ?? 'light'].tint }]}
+        <PrimaryButton
+          title="Sign In"
           onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <ThemedText style={styles.buttonText}>
-            {isLoading ? 'Signing In...' : 'Sign In'}
-          </ThemedText>
-        </Pressable>
+          isLoading={isLoading}
+          loadingText="Signing In..."
+        />
         
         <Pressable onPress={navigateToRegister} style={styles.linkContainer}>
           <ThemedText style={styles.linkText}>
-            Don't have an account? Sign up
+            Don&apos;t have an account? Sign up
           </ThemedText>
         </Pressable>
       </View>
       </ThemedView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     flex: 1,
     justifyContent: 'center',
@@ -145,24 +132,6 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-  },
-  button: {
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
   linkContainer: {
     alignItems: 'center',

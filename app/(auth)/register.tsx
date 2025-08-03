@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { View, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Pressable, StyleSheet, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/contexts/AuthContext';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ScreenContainer, FormInput, PrimaryButton } from '@/components/common';
 
 export default function RegisterScreen() {
   const [firstName, setFirstName] = useState('');
@@ -16,7 +14,6 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
-  const colorScheme = useColorScheme();
 
   const handleRegister = async () => {
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
@@ -38,7 +35,7 @@ export default function RegisterScreen() {
     try {
       await register({ firstName, lastName, email, password });
       router.replace('/(tabs)');
-    } catch (error) {
+    } catch {
       Alert.alert('Registration Failed', 'Please try again');
     } finally {
       setIsLoading(false);
@@ -50,35 +47,31 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
+    <ScreenContainer scrollable={false} backgroundColor="#FFF">
       <ThemedView style={styles.content}>
       <ThemedText type="title" style={styles.title}>Create Account</ThemedText>
       
       <View style={styles.form}>
         <View style={styles.nameRow}>
-          <TextInput
-            style={[styles.input, styles.nameInput, { color: Colors[colorScheme ?? 'light'].text }]}
+          <FormInput
+            style={styles.nameInput}
             placeholder="First Name"
-            placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
             value={firstName}
             onChangeText={setFirstName}
             autoComplete="given-name"
           />
           
-          <TextInput
-            style={[styles.input, styles.nameInput, { color: Colors[colorScheme ?? 'light'].text }]}
+          <FormInput
+            style={styles.nameInput}
             placeholder="Last Name"
-            placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
             value={lastName}
             onChangeText={setLastName}
             autoComplete="family-name"
           />
         </View>
         
-        <TextInput
-          style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+        <FormInput
           placeholder="Email"
-          placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -86,35 +79,28 @@ export default function RegisterScreen() {
           autoComplete="email"
         />
         
-        <TextInput
-          style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+        <FormInput
           placeholder="Password"
-          placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           autoComplete="password-new"
         />
         
-        <TextInput
-          style={[styles.input, { color: Colors[colorScheme ?? 'light'].text }]}
+        <FormInput
           placeholder="Confirm Password"
-          placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
           autoComplete="password-new"
         />
         
-        <Pressable
-          style={[styles.button, { backgroundColor: Colors[colorScheme ?? 'light'].tint }]}
+        <PrimaryButton
+          title="Sign Up"
           onPress={handleRegister}
-          disabled={isLoading}
-        >
-          <ThemedText style={styles.buttonText}>
-            {isLoading ? 'Creating Account...' : 'Sign Up'}
-          </ThemedText>
-        </Pressable>
+          isLoading={isLoading}
+          loadingText="Creating Account..."
+        />
         
         <Pressable onPress={navigateToLogin} style={styles.linkContainer}>
           <ThemedText style={styles.linkText}>
@@ -123,14 +109,11 @@ export default function RegisterScreen() {
         </Pressable>
       </View>
       </ThemedView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     flex: 1,
     justifyContent: 'center',
@@ -147,26 +130,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-  },
   nameInput: {
     flex: 1,
-  },
-  button: {
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
   linkContainer: {
     alignItems: 'center',

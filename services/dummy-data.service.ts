@@ -34,6 +34,54 @@ const dummyUsers: User[] = [
     createdAt: new Date('2024-02-10'),
     updatedAt: new Date('2024-02-10'),
   },
+  {
+    id: 'user-5',
+    email: 'art.boutique@example.com',
+    firstName: 'Art Boutique',
+    lastName: '@M...',
+    createdAt: new Date('2024-02-15'),
+    updatedAt: new Date('2024-02-15'),
+  },
+  {
+    id: 'user-6',
+    email: 'jason.smith@example.com',
+    firstName: 'Jason',
+    lastName: 'Smith',
+    createdAt: new Date('2024-02-20'),
+    updatedAt: new Date('2024-02-20'),
+  },
+  {
+    id: 'user-7',
+    email: 'alex.smith@example.com',
+    firstName: 'Alex',
+    lastName: 'Smith',
+    createdAt: new Date('2024-02-25'),
+    updatedAt: new Date('2024-02-25'),
+  },
+  {
+    id: 'user-8',
+    email: 'moss@example.com',
+    firstName: 'moss',
+    lastName: '',
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date('2024-03-01'),
+  },
+  {
+    id: 'user-9',
+    email: 'artskool@example.com',
+    firstName: 'Artskool',
+    lastName: 'Schedule',
+    createdAt: new Date('2024-03-05'),
+    updatedAt: new Date('2024-03-05'),
+  },
+  {
+    id: 'user-10',
+    email: 'micah@example.com',
+    firstName: 'Micah',
+    lastName: 'Clasper-Torch',
+    createdAt: new Date('2024-03-10'),
+    updatedAt: new Date('2024-03-10'),
+  },
 ];
 
 // Dummy categories
@@ -122,6 +170,76 @@ const dummyLocations: EventLocation[] = [
     latitude: 47.6062,
     longitude: -122.3321,
   },
+  {
+    id: 'loc-6',
+    name: 'LUME Studios',
+    address: '633 Rose Ave',
+    city: 'Mulberry Row',
+    state: 'CA',
+    country: 'US',
+    latitude: 34.0522,
+    longitude: -118.2437,
+  },
+  {
+    id: 'loc-7',
+    name: 'HER HOUSE OF HORRORS',
+    address: '1234 Horror St',
+    city: 'Los Angeles',
+    state: 'CA',
+    country: 'US',
+    latitude: 34.0522,
+    longitude: -118.2437,
+  },
+  {
+    id: 'loc-8',
+    name: 'moss',
+    address: '5678 Wellness Ave',
+    city: 'moss',
+    state: 'CA',
+    country: 'US',
+    latitude: 34.0522,
+    longitude: -118.2437,
+  },
+  {
+    id: 'loc-9',
+    name: 'Art Studio',
+    address: '1286 W Sunset Blvd',
+    city: 'West Hollywood',
+    state: 'CA',
+    country: 'US',
+    latitude: 34.0522,
+    longitude: -118.2437,
+  },
+  {
+    id: 'loc-10',
+    name: 'Fashion District',
+    address: '999 Fashion Way',
+    city: 'Downtown LA',
+    state: 'CA',
+    country: 'US',
+    latitude: 34.0522,
+    longitude: -118.2437,
+  },
+  {
+    id: 'loc-11',
+    name: 'Brooklyn Art Center',
+    address: '456 Creative Blvd',
+    city: 'Brooklyn',
+    state: 'NY',
+    country: 'US',
+    latitude: 40.6782,
+    longitude: -73.9442,
+  },
+  {
+    id: 'loc-12',
+    name: 'Blue Note Jazz Club',
+    address: '131 W 3rd St',
+    city: 'Greenwich Village',
+    state: 'NY',
+    country: 'US',
+    latitude: 40.7282,
+    longitude: -74.0021,
+  },
 ];
 
 // Generate dummy events
@@ -129,7 +247,7 @@ const generateDummyEvents = (): Event[] => {
   const events: Event[] = [];
   const now = new Date();
 
-  for (let i = 1; i <= 20; i++) {
+  for (let i = 1; i <= 40; i++) {
     const startDate = new Date(now);
     startDate.setDate(now.getDate() + Math.floor(Math.random() * 30) + 1); // 1-30 days from now
     startDate.setHours(9 + Math.floor(Math.random() * 12), 0, 0, 0); // Random hour between 9 AM and 9 PM
@@ -177,6 +295,27 @@ const generateDummyEvents = (): Event[] => {
       'Charity Run',
       'Language Exchange',
       'Meditation Session',
+      // New nearby-style events
+      'Sip + Paint Fridays',
+      'DOLLHOUSE OF HORROR FILM FESTIVAL',
+      'reiki + sound bath',
+      'Oil Painting Class - Florals',
+      'Punch Needle Fashion: LA Book Launch Party',
+      'Pottery Workshop: Beginner Friendly',
+      'Jazz Night at Blue Note',
+      'Ceramic Making & Wine',
+      'Brooklyn Art Walk',
+      'Comedy Show Open Mic',
+      'Vintage Market Pop-up',
+      'Rooftop Yoga Session',
+      'DIY Candle Making',
+      'Wine & Paint Social',
+      'Underground Dance Party',
+      'Food Truck Festival',
+      'Tarot Reading Circle',
+      'Skateboard Workshop',
+      'Plant Care 101',
+      'Horror Movie Marathon',
     ];
 
     const eventDescriptions = [
