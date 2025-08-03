@@ -65,13 +65,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="favorites"
+        name="notifications"
         options={{
-          title: 'Favorites',
+          title: 'Notifications',
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol 
               size={24} 
-              name={focused ? "heart.fill" : "heart"} 
+              name={focused ? "bell.fill" : "bell"} 
               color={color} 
             />
           ),
