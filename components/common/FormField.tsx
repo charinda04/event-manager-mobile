@@ -62,7 +62,10 @@ export function FormField({
   return (
     <ThemedView style={[styles.container, style]}>
       <Pressable 
-        style={styles.field}
+        style={[
+          styles.field,
+          { alignItems: multiline ? 'flex-start' : 'center' }
+        ]}
         onPress={handlePress}
         disabled={!editable}
       >
@@ -100,7 +103,6 @@ const styles = StyleSheet.create({
   },
   field: {
     flexDirection: 'row',
-    alignItems: multiline ? 'flex-start' : 'center',
     paddingVertical: Spacing.md,
     gap: Spacing.sm + 4, // 12px
   },

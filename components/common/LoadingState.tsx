@@ -21,7 +21,8 @@ export function LoadingState({
   inline = false,
 }: LoadingStateProps) {
   const textColor = useThemeColor({ light: Colors.light.textSecondary, dark: Colors.dark.textSecondary }, 'text');
-  const indicatorColor = color || useThemeColor({ light: Colors.light.tint, dark: Colors.dark.tint }, 'tint');
+  const themeIndicatorColor = useThemeColor({ light: Colors.light.tint, dark: Colors.dark.tint }, 'tint');
+  const indicatorColor = color || themeIndicatorColor;
 
   if (inline) {
     return (
