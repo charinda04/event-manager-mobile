@@ -1,64 +1,32 @@
-import { StyleSheet, Pressable, ScrollView, Image } from 'react-native';
+import { StyleSheet, Pressable, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useState } from 'react';
-import { useSearchEvents, useEvents } from '@/hooks/useEvents';
-import { AuthGuard, EventCard, SectionHeader } from '@/components/common';
+import { AuthGuard, SectionHeader, SearchBar } from '@/components/common';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-
-const mockEvents = [
-  {
-    id: '1',
-    title: 'Alo Moves x Pause | Sound Bath with Avery Whitmore',
-    description: 'Alo Moves x 1 Hotel Comm...',
-    startDate: new Date('2024-11-16T11:00:00'),
-    endDate: new Date('2024-11-16T12:30:00'),
-    organizer: { firstName: 'Alo', lastName: 'Moves' },
-    location: { name: 'Los Angeles', city: 'Los Angeles' },
-    capacity: 50,
-    attendees: []
-  },
-  {
-    id: '2',
-    title: 'Venture Social Club | Hollywood Hills',
-    description: 'STARTUPSTARTER®',
-    startDate: new Date('2024-11-16T18:00:00'),
-    endDate: new Date('2024-11-16T20:00:00'),
-    organizer: { firstName: 'StartUp', lastName: 'Starter' },
-    location: { name: 'Hollywood Hills', city: 'Los Angeles' },
-    capacity: 100,
-    attendees: []
-  },
-  {
-    id: '3',
-    title: 'LA Fintech Connect Happy Hour - Sponsored by TaskUs',
-    description: 'LA Fintech Connect',
-    startDate: new Date('2024-07-17T17:30:00'),
-    endDate: new Date('2024-07-17T19:30:00'),
-    organizer: { firstName: 'LA', lastName: 'Fintech' },
-    location: { name: 'Downtown LA', city: 'Los Angeles' },
-    capacity: 75,
-    attendees: []
-  }
-];
-
-const categories = [
-  { name: 'Climate', icon: '🌱', color: '#4CAF50' },
-  { name: 'Fitness', icon: '🏃', color: '#FF5722' },
-  { name: 'Wellness', icon: '🧘', color: '#9C27B0' }
-];
-
-const cities = [
-  { name: 'Los Angeles', image: '#2196F3' },
-  { name: 'San Francisco', image: '#FF9800' }
-];
+import { useExploreStore } from '@/stores/exploreStore';
+import { usePopularEvents, useFeaturedEvents, useSearchEvents } from '@/hooks/useExploreData';
 
 export default function ExploreScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const { data: searchResults } = useSearchEvents(searchQuery);
-  const { data: events } = useEvents();
+  const {
+    selectedLocation,
+    searchQuery,
+    selectedCategories,
+    categories,
+    cities,
+    setSelectedLocation,
+    setSearchQuery,
+    toggleCategory
+  } = useExploreStore();
 
-  const displayEvents = events?.events || mockEvents;
+  const { data: popularEvents, isLoading: isLoadingPopular } = usePopularEvents();
+  const { data: featuredEvents, isLoading: isLoadingFeatured } = useFeaturedEvents(selectedCategories);
+  const { data: searchResults, isLoading: isSearching } = useSearchEvents(searchQuery);
+
+  const displayEvents = searchQuery 
+    ? searchResults?.events || []
+    : popularEvents?.events || [];
+    
+  const isLoading = isLoadingPopular || isLoadingFeatured || isSearching;
 
   return (
     <AuthGuard>
@@ -76,113 +44,160 @@ export default function ExploreScreen() {
               <ThemedText style={styles.discoverText}>Discover</ThemedText>
             </ThemedView>
           </ThemedView>
-          <Pressable style={styles.mapButton}>
+          <Pressable style={styles.mapButton} onPress={() => setSearchQuery(searchQuery ? '' : 'search')}>
             <IconSymbol size={24} name="map" color="#000" />
           </Pressable>
         </ThemedView>
 
+        {/* Search Bar */}
+        {searchQuery && (
+          <ThemedView style={styles.searchSection}>
+            <SearchBar
+              placeholder="Search events..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </ThemedView>
+        )}
+
         {/* Location */}
         <ThemedView style={styles.locationSection}>
-          <ThemedText style={styles.locationTitle}>Los Angeles</ThemedText>
+          <ThemedText style={styles.locationTitle}>{selectedLocation}</ThemedText>
         </ThemedView>
 
         {/* Popular Events */}
         <ThemedView style={styles.section}>
           <SectionHeader 
-            title="Popular Events" 
-            showViewAll={true}
+            title={searchQuery ? "Search Results" : "Popular Events"} 
+            showViewAll={!searchQuery}
             viewAllText="View All ›"
           />
           
-          <ThemedView style={styles.eventsContainer}>
-            {displayEvents.slice(0, 3).map((event, index) => (
-              <ThemedView key={event.id} style={styles.eventWrapper}>
-                <ThemedView style={styles.eventImageContainer}>
-                  <ThemedView style={[
-                    styles.eventImage,
-                    { backgroundColor: index === 0 ? '#87CEEB' : index === 1 ? '#333' : '#FF6B35' }
-                  ]}>
-                    {index === 0 && (
-                      <ThemedView style={styles.eventImageContent}>
-                        <ThemedText style={styles.eventImageText}>alo</ThemedText>
-                      </ThemedView>
-                    )}
-                    {index === 1 && (
-                      <ThemedView style={styles.eventImageContent}>
-                        <ThemedText style={styles.eventImageLabel}>S</ThemedText>
-                      </ThemedView>
-                    )}
-                    {index === 2 && (
-                      <ThemedView style={styles.eventImageContent}>
-                        <ThemedView style={styles.fintechLogo} />
-                      </ThemedView>
-                    )}
-                  </ThemedView>
-                  
-                  {/* Waitlist button for first event */}
-                  {index === 0 && (
-                    <Pressable style={styles.waitlistButton}>
-                      <IconSymbol size={12} name="clock" color="#007AFF" />
-                      <ThemedText style={styles.waitlistText}>Waitlist</ThemedText>
-                    </Pressable>
-                  )}
-                </ThemedView>
-                
-                <ThemedView style={styles.eventDetails}>
-                  <ThemedView style={styles.eventHeader}>
-                    <ThemedText style={styles.eventOrganizer}>
-                      {index === 0 ? 'alo' : index === 1 ? 'S' : ''} {event.title.split(' ')[0]}
-                    </ThemedText>
-                  </ThemedView>
-                  
-                  <ThemedText style={styles.eventTitle} numberOfLines={2}>
-                    {event.title}
+          {isLoading ? (
+            <ThemedView style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#007AFF" />
+              <ThemedText style={styles.loadingText}>Loading events...</ThemedText>
+            </ThemedView>
+          ) : (
+            <ThemedView style={styles.eventsContainer}>
+              {displayEvents.length === 0 ? (
+                <ThemedView style={styles.emptyContainer}>
+                  <ThemedText style={styles.emptyText}>
+                    {searchQuery ? 'No events found' : 'No events available'}
                   </ThemedText>
-                  
-                  <ThemedView style={styles.eventMeta}>
-                    <IconSymbol size={12} name="clock" color="#8E8E93" />
-                    <ThemedText style={styles.eventTime}>
-                      {event.startDate.toLocaleDateString('en-US', { weekday: 'long' })}, {event.startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-                    </ThemedText>
-                  </ThemedView>
                 </ThemedView>
-              </ThemedView>
-            ))}
-          </ThemedView>
+              ) : (
+                displayEvents.slice(0, 3).map((event, index) => (
+                  <ThemedView key={event.id} style={styles.eventWrapper}>
+                    <ThemedView style={styles.eventImageContainer}>
+                      <ThemedView style={[
+                        styles.eventImage,
+                        { backgroundColor: index === 0 ? '#87CEEB' : index === 1 ? '#333' : '#FF6B35' }
+                      ]}>
+                        {index === 0 && (
+                          <ThemedView style={styles.eventImageContent}>
+                            <ThemedText style={styles.eventImageText}>alo</ThemedText>
+                          </ThemedView>
+                        )}
+                        {index === 1 && (
+                          <ThemedView style={styles.eventImageContent}>
+                            <ThemedText style={styles.eventImageLabel}>S</ThemedText>
+                          </ThemedView>
+                        )}
+                        {index === 2 && (
+                          <ThemedView style={styles.eventImageContent}>
+                            <ThemedView style={styles.fintechLogo} />
+                          </ThemedView>
+                        )}
+                      </ThemedView>
+                      
+                      {/* Waitlist button for first event */}
+                      {index === 0 && (
+                        <Pressable style={styles.waitlistButton}>
+                          <IconSymbol size={12} name="clock" color="#007AFF" />
+                          <ThemedText style={styles.waitlistText}>Waitlist</ThemedText>
+                        </Pressable>
+                      )}
+                    </ThemedView>
+                    
+                    <ThemedView style={styles.eventDetails}>
+                      <ThemedView style={styles.eventHeader}>
+                        <ThemedText style={styles.eventOrganizer}>
+                          {index === 0 ? 'alo' : index === 1 ? 'S' : ''} {event.title.split(' ')[0]}
+                        </ThemedText>
+                      </ThemedView>
+                      
+                      <ThemedText style={styles.eventTitle} numberOfLines={2}>
+                        {event.title}
+                      </ThemedText>
+                      
+                      <ThemedView style={styles.eventMeta}>
+                        <IconSymbol size={12} name="clock" color="#8E8E93" />
+                        <ThemedText style={styles.eventTime}>
+                          {event.startDate.toLocaleDateString('en-US', { weekday: 'long' })}, {event.startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        </ThemedText>
+                      </ThemedView>
+                    </ThemedView>
+                  </ThemedView>
+                ))
+              )}
+            </ThemedView>
+          )}
         </ThemedView>
 
         {/* Categories */}
-        <ThemedView style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Categories</ThemedText>
-          
-          <ThemedView style={styles.categoriesContainer}>
-            {categories.map((category) => (
-              <Pressable key={category.name} style={styles.categoryCard}>
-                <ThemedView style={[styles.categoryIcon, { backgroundColor: category.color }]}>
-                  <ThemedText style={styles.categoryEmoji}>{category.icon}</ThemedText>
-                </ThemedView>
-                <ThemedText style={styles.categoryName}>{category.name}</ThemedText>
-              </Pressable>
-            ))}
+        {!searchQuery && (
+          <ThemedView style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Categories</ThemedText>
+            
+            <ThemedView style={styles.categoriesContainer}>
+              {categories.slice(0, 3).map((category) => (
+                <Pressable 
+                  key={category.id} 
+                  style={[
+                    styles.categoryCard,
+                    selectedCategories.includes(category.id) && styles.categoryCardSelected
+                  ]}
+                  onPress={() => toggleCategory(category.id)}
+                >
+                  <ThemedView style={[styles.categoryIcon, { backgroundColor: category.color }]}>
+                    <ThemedText style={styles.categoryEmoji}>{category.icon}</ThemedText>
+                  </ThemedView>
+                  <ThemedText style={[
+                    styles.categoryName,
+                    selectedCategories.includes(category.id) && styles.categoryNameSelected
+                  ]}>
+                    {category.name}
+                  </ThemedText>
+                </Pressable>
+              ))}
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
+        )}
 
         {/* Cities */}
-        <ThemedView style={styles.section}>
-          <SectionHeader 
-            title="Cities" 
-            showViewAll={true}
-            viewAllText="View All ›"
-          />
-          
-          <ThemedView style={styles.citiesContainer}>
-            {cities.map((city) => (
-              <Pressable key={city.name} style={styles.cityCard}>
-                <ThemedView style={[styles.cityImage, { backgroundColor: city.image }]} />
-              </Pressable>
-            ))}
+        {!searchQuery && (
+          <ThemedView style={styles.section}>
+            <SectionHeader 
+              title="Cities" 
+              showViewAll={true}
+              viewAllText="View All ›"
+            />
+            
+            <ThemedView style={styles.citiesContainer}>
+              {cities.slice(0, 2).map((city) => (
+                <Pressable 
+                  key={city.id} 
+                  style={styles.cityCard}
+                  onPress={() => setSelectedLocation(city.name)}
+                >
+                  <ThemedView style={[styles.cityImage, { backgroundColor: city.image }]} />
+                  <ThemedText style={styles.cityName}>{city.name}</ThemedText>
+                </Pressable>
+              ))}
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
+        )}
         
         <ThemedView style={styles.bottomPadding} />
       </ScrollView>
@@ -237,6 +252,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  searchSection: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
   locationSection: {
     paddingHorizontal: 20,
     marginBottom: 24,
@@ -256,6 +275,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     marginBottom: 16,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#8E8E93',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#8E8E93',
+    textAlign: 'center',
   },
   eventsContainer: {
     gap: 16,
@@ -351,6 +388,11 @@ const styles = StyleSheet.create({
   categoryCard: {
     alignItems: 'center',
     gap: 8,
+    padding: 8,
+    borderRadius: 12,
+  },
+  categoryCardSelected: {
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
   },
   categoryIcon: {
     width: 60,
@@ -367,16 +409,29 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#000',
   },
+  categoryNameSelected: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
   citiesContainer: {
     flexDirection: 'row',
     gap: 12,
   },
   cityCard: {
     flex: 1,
+    alignItems: 'center',
+    gap: 8,
   },
   cityImage: {
     height: 120,
     borderRadius: 12,
+    width: '100%',
+  },
+  cityName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#000',
+    textAlign: 'center',
   },
   bottomPadding: {
     height: 100,
