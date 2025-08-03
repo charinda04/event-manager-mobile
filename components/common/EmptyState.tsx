@@ -1,70 +1,165 @@
-import { StyleSheet } from 'react-native';
+import React from 'react';
+import { StyleSheet, Pressable, ViewStyle } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Colors, Spacing, FontSize, FontWeight, BorderRadius } from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface EmptyStateProps {
-  icon: string;
+  icon?: string;
+  emoji?: string;
   title: string;
   description: string;
   iconColor?: string;
+  action?: {
+    label: string;
+    onPress: () => void;
+  };
+  layout?: 'horizontal' | 'vertical';
+  style?: ViewStyle;
 }
 
 export function EmptyState({ 
-  icon, 
+  icon,
+  emoji,
   title, 
   description, 
-  iconColor = '#C7C7CC' 
+  iconColor,
+  action,
+  layout = 'vertical',
+  style,
 }: EmptyStateProps) {
+  const textColor = useThemeColor({ light: Colors.light.text, dark: Colors.dark.text }, 'text');
+  const textSecondary = useThemeColor({ light: Colors.light.textSecondary, dark: Colors.dark.textSecondary }, 'text');
+  const iconBg = useThemeColor({ light: Colors.light.gray[100], dark: Colors.dark.gray[200] }, 'background');
+  const defaultIconColor = useThemeColor({ light: Colors.light.gray[400], dark: Colors.dark.gray[400] }, 'text');
+
+  const isHorizontal = layout === 'horizontal';
+
   return (
-    <ThemedView style={styles.emptyState}>
-      <ThemedView style={styles.emptyIcon}>
-        <IconSymbol 
-          size={28} 
-          name={icon} 
-          color={iconColor} 
-        />
+    <ThemedView style={[
+      isHorizontal ? styles.horizontalContainer : styles.verticalContainer,
+      style
+    ]} testID="empty-state">
+      {/* Icon/Emoji */}
+      <ThemedView style={[
+        styles.iconContainer,
+        { backgroundColor: iconBg }
+      ]}>
+        {emoji ? (
+          <ThemedText style={styles.emoji}>{emoji}</ThemedText>
+        ) : icon ? (
+          <IconSymbol 
+            size={28} 
+            name={icon} 
+            color={iconColor || defaultIconColor}
+          />
+        ) : null}
       </ThemedView>
-      <ThemedView style={styles.emptyContent}>
-        <ThemedText style={styles.emptyTitle}>{title}</ThemedText>
-        <ThemedText style={styles.emptyDescription}>
+      
+      {/* Content */}
+      <ThemedView style={[
+        styles.content,
+        isHorizontal && styles.horizontalContent
+      ]}>
+        <ThemedText style={[
+          styles.title,
+          { color: textColor },
+          isHorizontal && styles.horizontalTitle
+        ]}>
+          {title}
+        </ThemedText>
+        <ThemedText style={[
+          styles.description,
+          { color: textSecondary },
+          isHorizontal && styles.horizontalDescription
+        ]}>
           {description}
         </ThemedText>
+        
+        {/* Action Button */}
+        {action && (
+          <Pressable 
+            style={[
+              styles.actionButton,
+              { backgroundColor: textColor }
+            ]}
+            onPress={action.onPress}
+          >
+            <ThemedText style={[
+              styles.actionText,
+              { color: Colors.light.backgroundSecondary }
+            ]}>
+              {action.label}
+            </ThemedText>
+          </Pressable>
+        )}
       </ThemedView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  emptyState: {
+  verticalContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xxxl + 20, // 60px
+    paddingHorizontal: Spacing.xxxl,
+  },
+  horizontalContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 14,
-    paddingHorizontal: 16,
-    marginTop: 40,
+    gap: Spacing.sm + 6, // 14px
+    paddingHorizontal: Spacing.md,
+    marginTop: Spacing.xxxl,
   },
-  emptyIcon: {
+  iconContainer: {
     width: 56,
     height: 56,
-    borderRadius: 12,
-    backgroundColor: '#F0F0F0',
+    borderRadius: BorderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 2,
   },
-  emptyContent: {
+  emoji: {
+    fontSize: 24,
+  },
+  content: {
+    alignItems: 'center',
+  },
+  horizontalContent: {
     flex: 1,
+    alignItems: 'flex-start',
     paddingTop: 2,
   },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 6,
+  title: {
+    fontSize: FontSize.xl,
+    fontWeight: FontWeight.semibold,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
   },
-  emptyDescription: {
-    fontSize: 14,
-    color: '#8E8E93',
+  horizontalTitle: {
+    fontSize: FontSize.lg - 1, // 17px
+    textAlign: 'left',
+    marginBottom: Spacing.xs + 2, // 6px
+  },
+  description: {
+    fontSize: FontSize.sm,
     lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: Spacing.xl,
+  },
+  horizontalDescription: {
+    textAlign: 'left',
+    marginBottom: 0,
+    lineHeight: 20,
+  },
+  actionButton: {
+    borderRadius: BorderRadius.xxl,
+    paddingHorizontal: Spacing.xxl,
+    paddingVertical: Spacing.sm + 4, // 12px
+  },
+  actionText: {
+    fontSize: FontSize.md,
+    fontWeight: FontWeight.semibold,
   },
 });

@@ -1,14 +1,21 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, Alert, ScrollView, Image } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { Pressable, StyleSheet, Alert, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useCreateEvent } from '@/hooks/useEvents';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { AuthGuard } from '@/components/common';
+import { 
+  AuthGuard, 
+  ScreenHeader,
+  ImageUpload,
+  FormField,
+  OptionRow,
+  PrimaryButton
+} from '@/components/common';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { BlurView } from 'expo-blur';
+import { Colors, Spacing, FontSize, FontWeight } from '@/constants/Colors';
 
 
 export default function CreateEventScreen() {
@@ -26,7 +33,7 @@ export default function CreateEventScreen() {
   
   const createEventMutation = useCreateEvent();
 
-  const pickImage = async () => {
+  const pickImage = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -37,7 +44,7 @@ export default function CreateEventScreen() {
     if (!result.canceled) {
       setEventImage(result.assets[0].uri);
     }
-  };
+  }, []);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -91,36 +98,25 @@ export default function CreateEventScreen() {
     <AuthGuard>
       <ThemedView style={styles.container}>
         <BlurView intensity={20} style={styles.blurContainer}>
-          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-            {/* Header */}
-            <ThemedView style={styles.header}>
-              <Pressable onPress={() => router.back()} style={styles.backButton}>
-                <IconSymbol size={24} name="arrow.left" color="white" />
-              </Pressable>
-              <ThemedText style={styles.headerTitle}>Create Event</ThemedText>
-              <ThemedView style={styles.placeholder} />
-            </ThemedView>
+          {/* Header */}
+          <ScreenHeader
+            title="Create Event"
+            leftAction={{
+              icon: "arrow.left",
+              onPress: () => router.back(),
+              accessibilityLabel: "Go back"
+            }}
+            backgroundColor="transparent"
+            titleStyle={{ color: 'white' }}
+          />
 
-            {/* Image Upload Section */}
-            <ThemedView style={styles.imageSection}>
-              <Pressable style={styles.imageUpload} onPress={pickImage}>
-                {eventImage ? (
-                  <Image source={{ uri: eventImage }} style={styles.uploadedImage} />
-                ) : (
-                  <ThemedView style={styles.imagePlaceholder}>
-                    <ThemedView style={styles.brushStrokes}>
-                      <ThemedView style={[styles.brushStroke, { backgroundColor: '#ff6b9d', transform: [{ rotate: '15deg' }] }]} />
-                      <ThemedView style={[styles.brushStroke, { backgroundColor: '#4ecdc4', transform: [{ rotate: '-10deg' }] }]} />
-                      <ThemedView style={[styles.brushStroke, { backgroundColor: '#45b7d1', transform: [{ rotate: '25deg' }] }]} />
-                      <ThemedView style={[styles.brushStroke, { backgroundColor: '#96ceb4', transform: [{ rotate: '-20deg' }] }]} />
-                    </ThemedView>
-                    <ThemedView style={styles.cameraIcon}>
-                      <IconSymbol size={20} name="camera.circle" color="white" />
-                    </ThemedView>
-                  </ThemedView>
-                )}
-              </Pressable>
-            </ThemedView>
+          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+            {/* Image Upload */}
+            <ImageUpload
+              imageUri={eventImage}
+              onPress={pickImage}
+              style={{ paddingHorizontal: Spacing.lg }}
+            />
 
             {/* Event Name */}
             <ThemedView style={styles.section}>
@@ -141,122 +137,81 @@ export default function CreateEventScreen() {
 
             {/* Create Button */}
             <ThemedView style={styles.section}>
-              <Pressable 
-                style={[styles.createButton, createEventMutation.isPending && styles.createButtonDisabled]}
+              <PrimaryButton
+                title={createEventMutation.isPending ? 'Creating...' : 'Create Event'}
                 onPress={handleCreateEvent}
                 disabled={createEventMutation.isPending}
-              >
-                <ThemedText style={styles.createButtonText}>
-                  {createEventMutation.isPending ? 'Creating...' : 'Create Event'}
-                </ThemedText>
-              </Pressable>
+                loading={createEventMutation.isPending}
+                style={styles.createButton}
+              />
             </ThemedView>
 
             {/* Date and Time */}
-            <ThemedView style={styles.section}>
-              <Pressable 
-                style={styles.dateTimeRow}
-                onPress={() => setShowStartDatePicker(true)}
-              >
-                <IconSymbol size={20} name="clock" color="rgba(255,255,255,0.7)" />
-                <ThemedText style={styles.dateTimeLabel}>Start</ThemedText>
-                <ThemedText style={styles.dateTimeValue}>
-                  {formatDate(startDate)} at {formatTime(startDate)}
-                </ThemedText>
-              </Pressable>
-              
-              <Pressable 
-                style={styles.dateTimeRow}
-                onPress={() => setShowEndTimePicker(true)}
-              >
-                <IconSymbol size={20} name="clock" color="rgba(255,255,255,0.7)" />
-                <ThemedText style={styles.dateTimeLabel}>End</ThemedText>
-                <ThemedText style={styles.dateTimeValue}>
-                  {formatTime(endDate)}
-                </ThemedText>
-              </Pressable>
-            </ThemedView>
+            <FormField
+              icon="clock"
+              label="Start"
+              value={`${formatDate(startDate)} at ${formatTime(startDate)}`}
+              placeholder="Select start date and time"
+              onPress={() => setShowStartDatePicker(true)}
+            />
+            
+            <FormField
+              icon="clock"
+              label="End"
+              value={formatTime(endDate)}
+              placeholder="Select end time"
+              onPress={() => setShowEndTimePicker(true)}
+            />
 
             {/* Location */}
-            <ThemedView style={styles.section}>
-              <Pressable 
-                style={styles.locationRow}
-                onPress={() => {
-                  Alert.prompt('Location', 'Enter event location', (text) => {
-                    if (text !== null) setLocationName(text);
-                  }, 'plain-text', locationName);
-                }}
-              >
-                <IconSymbol size={20} name="location" color="rgba(255,255,255,0.7)" />
-                <ThemedText style={styles.locationText}>
-                  {locationName || 'Choose Location'}
-                </ThemedText>
-              </Pressable>
-            </ThemedView>
+            <FormField
+              icon="location"
+              value={locationName}
+              placeholder="Choose Location"
+              onChangeText={setLocationName}
+            />
 
             {/* Description */}
-            <ThemedView style={styles.section}>
-              <Pressable 
-                style={styles.descriptionRow}
-                onPress={() => {
-                  Alert.prompt('Description', 'Enter event description', (text) => {
-                    if (text !== null) setDescription(text);
-                  }, 'plain-text', description);
-                }}
-              >
-                <IconSymbol size={20} name="text.alignleft" color="rgba(255,255,255,0.7)" />
-                <ThemedText style={styles.descriptionText}>
-                  {description || 'Add Description'}
-                </ThemedText>
-              </Pressable>
-            </ThemedView>
+            <FormField
+              icon="text.alignleft"
+              value={description}
+              placeholder="Add Description"
+              onChangeText={setDescription}
+              multiline
+            />
 
             {/* Options */}
             <ThemedView style={styles.optionsSection}>
               <ThemedText style={styles.optionsTitle}>Options</ThemedText>
               
-              <ThemedView style={styles.optionRow}>
-                <IconSymbol size={20} name="eye" color="rgba(255,255,255,0.7)" />
-                <ThemedText style={styles.optionLabel}>Visibility</ThemedText>
-                <Pressable 
-                  style={styles.optionValue}
-                  onPress={() => setIsPublic(!isPublic)}
-                >
-                  <ThemedText style={styles.optionValueText}>
-                    {isPublic ? 'Public' : 'Private'}
-                  </ThemedText>
-                  <IconSymbol size={16} name="chevron.down" color="rgba(255,255,255,0.7)" />
-                </Pressable>
-              </ThemedView>
+              <OptionRow
+                icon="eye"
+                label="Visibility"
+                value={isPublic ? 'Public' : 'Private'}
+                onPress={() => setIsPublic(!isPublic)}
+              />
               
-              <ThemedView style={styles.optionRow}>
-                <IconSymbol size={20} name="person.2" color="rgba(255,255,255,0.7)" />
-                <ThemedText style={styles.optionLabel}>Capacity</ThemedText>
-                <Pressable 
-                  style={styles.optionValue}
-                  onPress={() => {
-                    if (isUnlimited) {
-                      Alert.prompt('Capacity', 'Enter max capacity', (text) => {
-                        if (text && !isNaN(parseInt(text))) {
-                          setMaxCapacity(text);
-                          setIsUnlimited(false);
-                        }
-                      }, 'numeric');
-                    } else {
-                      setIsUnlimited(true);
-                      setMaxCapacity('');
-                    }
-                  }}
-                >
-                  <ThemedText style={styles.optionValueText}>
-                    {isUnlimited ? 'Unlimited' : maxCapacity}
-                  </ThemedText>
-                  <IconSymbol size={16} name="chevron.down" color="rgba(255,255,255,0.7)" />
-                </Pressable>
-              </ThemedView>
+              <OptionRow
+                icon="person.2"
+                label="Capacity"
+                value={isUnlimited ? 'Unlimited' : maxCapacity}
+                onPress={() => {
+                  if (isUnlimited) {
+                    Alert.prompt('Capacity', 'Enter max capacity', (text) => {
+                      if (text && !isNaN(parseInt(text))) {
+                        setMaxCapacity(text);
+                        setIsUnlimited(false);
+                      }
+                    }, 'numeric');
+                  } else {
+                    setIsUnlimited(true);
+                    setMaxCapacity('');
+                  }
+                }}
+              />
             </ThemedView>
 
-            <ThemedView style={styles.bottomPadding} />
+            <ThemedView style={{ height: 100 }} />
           </ScrollView>
         </BlurView>
 
@@ -301,7 +256,7 @@ export default function CreateEventScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#6c5ce7',
+    backgroundColor: Colors.light.purple,
   },
   blurContainer: {
     flex: 1,
@@ -310,88 +265,18 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
-  },
-  placeholder: {
-    width: 40,
-  },
-  imageSection: {
-    paddingHorizontal: 20,
-    marginBottom: 30,
-  },
-  imageUpload: {
-    width: '100%',
-    height: 200,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  uploadedImage: {
-    width: '100%',
-    height: '100%',
-  },
-  imagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  brushStrokes: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  brushStroke: {
-    position: 'absolute',
-    width: 80,
-    height: 12,
-    borderRadius: 6,
-    opacity: 0.8,
-  },
-  cameraIcon: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   section: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
   },
   inputContainer: {
     position: 'relative',
   },
   inputPlaceholder: {
-    fontSize: 24,
-    fontWeight: '300',
+    fontSize: FontSize.xxl,
+    fontWeight: FontWeight.light,
     color: 'rgba(255, 255, 255, 0.8)',
-    paddingVertical: 16,
+    paddingVertical: Spacing.md,
   },
   invisibleInput: {
     position: 'absolute',
@@ -400,90 +285,18 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  dateTimeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    gap: 12,
-  },
-  dateTimeLabel: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
-    width: 50,
-  },
-  dateTimeValue: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: '500',
-  },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    gap: 12,
-  },
-  locationText: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  descriptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    gap: 12,
-  },
-  descriptionText: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
-    flex: 1,
-  },
   optionsSection: {
-    paddingHorizontal: 20,
-    marginTop: 20,
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
   },
   optionsTitle: {
-    fontSize: 18,
+    fontSize: FontSize.lg,
     color: 'rgba(255, 255, 255, 0.7)',
-    marginBottom: 20,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    gap: 12,
-  },
-  optionLabel: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
-    flex: 1,
-  },
-  optionValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  optionValueText: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: '500',
-  },
-  bottomPadding: {
-    height: 100,
+    marginBottom: Spacing.lg,
+    fontWeight: FontWeight.medium,
   },
   createButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  createButtonDisabled: {
-    opacity: 0.6,
-  },
-  createButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
+    marginTop: Spacing.lg,
   },
 });

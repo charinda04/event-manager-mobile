@@ -1,8 +1,14 @@
-import { StyleSheet, ScrollView } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
+import React, { useMemo } from 'react';
+import { ScrollView } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
-import { AuthGuard } from '@/components/common';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { 
+  AuthGuard, 
+  ScreenHeader, 
+  Timeline, 
+  EmptyState,
+  type TimelineSection 
+} from '@/components/common';
+import { Colors, Spacing } from '@/constants/Colors';
 
 export default function NotificationsScreen() {
   const notifications = [
@@ -13,7 +19,7 @@ export default function NotificationsScreen() {
       description: 'Tech Meetup Downtown',
       time: '2 hours ago',
       icon: '🔔',
-      iconBg: '#ff6b9d',
+      iconBg: Colors.light.pink,
       isNew: true,
       section: 'today'
     },
@@ -24,7 +30,7 @@ export default function NotificationsScreen() {
       description: 'Coffee & Code Session',
       time: '4 hours ago',
       icon: '👤',
-      iconBg: '#4ecdc4',
+      iconBg: Colors.light.teal,
       isNew: true,
       section: 'today'
     },
@@ -35,7 +41,7 @@ export default function NotificationsScreen() {
       description: 'Design Workshop',
       time: '3 days ago',
       icon: '📍',
-      iconBg: '#ff9f43',
+      iconBg: Colors.light.orange,
       isNew: false,
       section: 'lastWeek'
     },
@@ -46,83 +52,58 @@ export default function NotificationsScreen() {
       description: '',
       time: '5 days ago',
       icon: '👥',
-      iconBg: '#6c5ce7',
+      iconBg: Colors.light.purple,
       isNew: false,
       section: 'lastWeek'
     }
   ];
 
-  const todayNotifications = notifications.filter(n => n.section === 'today');
-  const lastWeekNotifications = notifications.filter(n => n.section === 'lastWeek');
-  const newCount = notifications.filter(n => n.isNew).length;
+  const timelineSections: TimelineSection[] = useMemo(() => {
+    const todayNotifications = notifications.filter(n => n.section === 'today');
+    const lastWeekNotifications = notifications.filter(n => n.section === 'lastWeek');
+    const newCount = notifications.filter(n => n.isNew).length;
+
+    return [
+      {
+        title: 'Today',
+        items: todayNotifications,
+        showNewBadge: true,
+        newCount,
+      },
+      {
+        title: 'Last Week',
+        items: lastWeekNotifications,
+      },
+    ];
+  }, [notifications]);
 
   return (
     <AuthGuard>
-      <ThemedView style={styles.container}>
+      <ThemedView style={{ flex: 1, backgroundColor: Colors.light.background }}>
         {/* Header */}
-        <ThemedView style={styles.header}>
-          <ThemedView style={styles.headerLeft}>
-            <ThemedView style={styles.avatar}>
-              <IconSymbol size={20} name="person.circle" color="#8E8E93" />
-            </ThemedView>
-            <ThemedText style={styles.headerTitle}>Notifications</ThemedText>
-          </ThemedView>
-        </ThemedView>
+        <ScreenHeader
+          title="Notifications"
+          avatar={{
+            fallbackIcon: "person.circle",
+          }}
+        />
 
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          {/* Timeline Section */}
-          <ThemedView style={styles.timelineContainer}>
-            {/* Today Section */}
-            <ThemedView style={styles.timelineSection}>
-              <ThemedView style={styles.sectionHeader}>
-                <ThemedText style={styles.sectionTitle}>Today</ThemedText>
-                {newCount > 0 && (
-                  <ThemedView style={styles.newBadge}>
-                    <ThemedText style={styles.newBadgeText}>{newCount} New</ThemedText>
-                  </ThemedView>
-                )}
-              </ThemedView>
-              
-              <ThemedView style={styles.notificationsList}>
-                {todayNotifications.map((notification, index) => (
-                  <ThemedView key={notification.id} style={styles.notificationItem}>
-                    <ThemedView style={[styles.notificationIcon, { backgroundColor: notification.iconBg }]}>
-                      <ThemedText style={styles.notificationEmoji}>{notification.icon}</ThemedText>
-                    </ThemedView>
-                    <ThemedView style={styles.notificationLine} />
-                  </ThemedView>
-                ))}
-              </ThemedView>
-            </ThemedView>
-
-            {/* Last Week Section */}
-            <ThemedView style={styles.timelineSection}>
-              <ThemedView style={styles.sectionHeader}>
-                <ThemedText style={styles.sectionTitle}>Last Week</ThemedText>
-              </ThemedView>
-              
-              <ThemedView style={styles.notificationsList}>
-                {lastWeekNotifications.map((notification, index) => (
-                  <ThemedView key={notification.id} style={styles.notificationItem}>
-                    <ThemedView style={[styles.notificationIcon, { backgroundColor: notification.iconBg }]}>
-                      <ThemedText style={styles.notificationEmoji}>{notification.icon}</ThemedText>
-                    </ThemedView>
-                    <ThemedView style={styles.notificationLine} />
-                  </ThemedView>
-                ))}
-              </ThemedView>
-            </ThemedView>
-          </ThemedView>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Timeline */}
+          <Timeline 
+            sections={timelineSections}
+            style={{ paddingTop: Spacing.lg }}
+          />
 
           {/* Empty State */}
-          <ThemedView style={styles.emptyState}>
-            <ThemedText style={styles.emptyTitle}>No Notifications</ThemedText>
-            <ThemedText style={styles.emptyDescription}>
-              Notifications about your events and{"\n"}friends will show up here.
-            </ThemedText>
-          </ThemedView>
+          <EmptyState
+            title="No Notifications"
+            description="Notifications about your events and friends will show up here."
+            layout="vertical"
+            style={{ marginTop: Spacing.xxl }}
+          />
 
-          <ThemedView style={styles.bottomPadding} />
+          <ThemedView style={{ height: 100 }} />
         </ScrollView>
       </ThemedView>
     </AuthGuard>
