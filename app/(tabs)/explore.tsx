@@ -18,6 +18,44 @@ export default function ExploreScreen() {
     toggleCategory
   } = useExploreStore();
 
+  const featuredCalendars = [
+    {
+      id: '1',
+      name: 'Reading Rhythms Global',
+      description: 'Not a book club. A reading party. Read with friends to live music & curated pla...',
+      icon: '⌚',
+      iconBg: '#000'
+    },
+    {
+      id: '2',
+      name: 'ADPList',
+      description: 'Your one-stop-shop for all things happening in the ADPList Community!...',
+      icon: '😊',
+      iconBg: '#000'
+    },
+    {
+      id: '3',
+      name: 'Build Club',
+      description: 'The best place in the world to learn AI. Curated with 💜 by the Build Club team',
+      icon: 'BC',
+      iconBg: '#6366f1'
+    },
+    {
+      id: '4',
+      name: 'Her Workplace',
+      description: 'Her Workplace is a career networking platform that elevates, connects, and s...',
+      icon: 'HW',
+      iconBg: '#000'
+    },
+    {
+      id: '5',
+      name: 'Design Buddies',
+      description: 'Design community helping designers grow through mentorship and events...',
+      icon: '🏠',
+      iconBg: '#fbbf24'
+    }
+  ];
+
   const { data: popularEvents, isLoading: isLoadingPopular } = usePopularEvents();
   const { isLoading: isLoadingFeatured } = useFeaturedEvents(selectedCategories);
   const { data: searchResults, isLoading: isSearching } = useSearchEvents(searchQuery);
@@ -193,6 +231,39 @@ export default function ExploreScreen() {
                 >
                   <ThemedView style={[styles.cityImage, { backgroundColor: city.image }]} />
                   <ThemedText style={styles.cityName}>{city.name}</ThemedText>
+                </Pressable>
+              ))}
+            </ThemedView>
+          </ThemedView>
+        )}
+
+        {/* Featured Calendars */}
+        {!searchQuery && (
+          <ThemedView style={styles.section}>
+            <ThemedView style={styles.featuredHeader}>
+              <ThemedText style={styles.featuredTitle}>Featured Calendars</ThemedText>
+              <ThemedText style={styles.featuredSubtitle}>That We Love</ThemedText>
+            </ThemedView>
+            
+            <ThemedView style={styles.featuredCalendarsContainer}>
+              {featuredCalendars.map((calendar, index) => (
+                <Pressable 
+                  key={calendar.id} 
+                  style={styles.calendarCard}
+                  onPress={() => {}}
+                >
+                  <ThemedView style={styles.calendarCardContent}>
+                    <ThemedView style={[styles.calendarIcon, { backgroundColor: calendar.iconBg }]}>
+                      <ThemedText style={styles.calendarIconText}>{calendar.icon}</ThemedText>
+                    </ThemedView>
+                    
+                    <ThemedView style={styles.calendarInfo}>
+                      <ThemedText style={styles.calendarName}>{calendar.name}</ThemedText>
+                      <ThemedText style={styles.calendarDescription} numberOfLines={2}>
+                        {calendar.description}
+                      </ThemedText>
+                    </ThemedView>
+                  </ThemedView>
                 </Pressable>
               ))}
             </ThemedView>
@@ -435,5 +506,63 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 100,
+  },
+  featuredHeader: {
+    marginBottom: 20,
+  },
+  featuredTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 2,
+  },
+  featuredSubtitle: {
+    fontSize: 16,
+    color: '#8E8E93',
+    fontWeight: '400',
+  },
+  featuredCalendarsContainer: {
+    gap: 16,
+  },
+  calendarCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  calendarCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  calendarIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  calendarIconText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFF',
+  },
+  calendarInfo: {
+    flex: 1,
+  },
+  calendarName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
+  },
+  calendarDescription: {
+    fontSize: 14,
+    color: '#8E8E93',
+    lineHeight: 18,
   },
 });
