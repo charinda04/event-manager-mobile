@@ -1,4 +1,5 @@
 import { FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useEvents } from '@/hooks/useEvents';
@@ -33,34 +34,39 @@ export default function EventsScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Upcoming Events</ThemedText>
-      
-      <FlatList
-        data={data?.events || []}
-        renderItem={renderEvent}
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
-        }
-        onEndReached={() => {
-          if (hasNextPage) {
-            fetchNextPage();
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <ThemedView style={styles.content}>
+        <ThemedText type="title" style={styles.title}>Upcoming Events</ThemedText>
+        
+        <FlatList
+          data={data?.events || []}
+          renderItem={renderEvent}
+          keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={refetch} />
           }
-        }}
-        onEndReachedThreshold={0.1}
-        ListEmptyComponent={
-          <ThemedView style={styles.emptyContainer}>
-            <ThemedText>No events found</ThemedText>
-          </ThemedView>
-        }
-      />
-    </ThemedView>
+          onEndReached={() => {
+            if (hasNextPage) {
+              fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.1}
+          ListEmptyComponent={
+            <ThemedView style={styles.emptyContainer}>
+              <ThemedText>No events found</ThemedText>
+            </ThemedView>
+          }
+        />
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
     padding: 16,
   },

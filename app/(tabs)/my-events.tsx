@@ -1,4 +1,5 @@
 import { FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useMyEvents } from '@/hooks/useEvents';
@@ -36,8 +37,9 @@ export default function MyEventsScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>My Events</ThemedText>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <ThemedView style={styles.content}>
+        <ThemedText type="title" style={styles.title}>My Events</ThemedText>
       
       <FlatList
         data={data?.events || []}
@@ -57,13 +59,17 @@ export default function MyEventsScreen() {
             <ThemedText>You haven't created any events yet</ThemedText>
           </ThemedView>
         }
-      />
-    </ThemedView>
+        />
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
     padding: 16,
   },

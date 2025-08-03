@@ -1,4 +1,5 @@
 import { StyleSheet, Pressable, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,7 +41,8 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <ThemedView style={styles.content}>
       <ThemedText type="title" style={styles.title}>Profile</ThemedText>
       
       <ThemedView style={styles.userInfo}>
@@ -81,12 +83,16 @@ export default function ProfileScreen() {
       >
         <ThemedText style={styles.logoutText}>Logout</ThemedText>
       </Pressable>
-    </ThemedView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
     padding: 16,
   },

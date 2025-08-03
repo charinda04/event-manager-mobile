@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -49,7 +50,8 @@ export default function RegisterScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
+      <ThemedView style={styles.content}>
       <ThemedText type="title" style={styles.title}>Create Account</ThemedText>
       
       <View style={styles.form}>
@@ -120,12 +122,16 @@ export default function RegisterScreen() {
           </ThemedText>
         </Pressable>
       </View>
-    </ThemedView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
     justifyContent: 'center',
     padding: 20,

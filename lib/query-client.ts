@@ -13,3 +13,10 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Attach Reactotron devtools in development
+if (__DEV__) {
+  import('@/lib/reactotron').then(({ attachReactQueryDevtools }) => {
+    attachReactQueryDevtools(queryClient);
+  });
+}

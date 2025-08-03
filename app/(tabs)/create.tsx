@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -75,8 +76,9 @@ export default function CreateEventScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <ThemedView style={styles.content}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <ScrollView style={styles.scrollView}>
+        <ThemedView style={styles.content}>
         <ThemedText type="title" style={styles.title}>Create Event</ThemedText>
         
         <ThemedView style={styles.form}>
@@ -190,14 +192,18 @@ export default function CreateEventScreen() {
               {createEventMutation.isPending ? 'Creating...' : 'Create Event'}
             </ThemedText>
           </Pressable>
+          </ThemedView>
         </ThemedView>
-      </ThemedView>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   content: {

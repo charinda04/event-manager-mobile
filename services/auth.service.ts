@@ -26,6 +26,26 @@ const USER_KEY = 'user_data';
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    // Handle dummy login for development/demo purposes
+    if (credentials.email === 'demo@example.com' && credentials.password === 'password123') {
+      const dummyAuthData: AuthResponse = {
+        user: {
+          id: 'demo-user-1',
+          email: 'demo@example.com',
+          firstName: 'Demo',
+          lastName: 'User',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        token: 'dummy-jwt-token-' + Date.now(),
+        refreshToken: 'dummy-refresh-token-' + Date.now(),
+      };
+      
+      await this.storeAuthData(dummyAuthData);
+      apiClient.setAuthToken(dummyAuthData.token);
+      return dummyAuthData;
+    }
+
     const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
     
     if (response.success) {
@@ -60,6 +80,12 @@ class AuthService {
 
   async getCurrentUser(): Promise<User | null> {
     try {
+      // Check if we have a dummy token first
+      const token = await this.getStoredToken();
+      if (token?.startsWith('dummy-jwt-token-')) {
+        return await this.getStoredUser();
+      }
+
       const response = await apiClient.get<User>('/auth/me');
       return response.success ? response.data : null;
     } catch (error) {

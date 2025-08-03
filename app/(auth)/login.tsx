@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -8,8 +9,8 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('demo@example.com');
+  const [password, setPassword] = useState('password123');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const colorScheme = useColorScheme();
@@ -35,9 +36,24 @@ export default function LoginScreen() {
     router.push('/(auth)/register');
   };
 
+  const fillDummyCredentials = () => {
+    setEmail('demo@example.com');
+    setPassword('password123');
+  };
+
   return (
-    <ThemedView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
+      <ThemedView style={styles.content}>
       <ThemedText type="title" style={styles.title}>Welcome Back</ThemedText>
+      
+      <View style={styles.demoSection}>
+        <ThemedText style={styles.demoText}>Demo Credentials (pre-filled):</ThemedText>
+        <ThemedText style={styles.demoCredentials}>Email: demo@example.com</ThemedText>
+        <ThemedText style={styles.demoCredentials}>Password: password123</ThemedText>
+        <Pressable onPress={fillDummyCredentials} style={styles.demoButton}>
+          <ThemedText style={styles.demoButtonText}>Use Demo Credentials</ThemedText>
+        </Pressable>
+      </View>
       
       <View style={styles.form}>
         <TextInput
@@ -77,19 +93,55 @@ export default function LoginScreen() {
           </ThemedText>
         </Pressable>
       </View>
-    </ThemedView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     padding: 20,
   },
   title: {
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
+  },
+  demoSection: {
+    backgroundColor: '#f0f8ff',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  demoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  demoCredentials: {
+    fontSize: 12,
+    opacity: 0.8,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  demoButton: {
+    backgroundColor: '#007AFF',
+    padding: 8,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  demoButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '500',
   },
   form: {
     gap: 16,
